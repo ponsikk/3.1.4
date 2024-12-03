@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @Controller
+@RequestMapping("/user")  // Замапил
 public class UserController {
     private final UserService userService;
 
@@ -21,7 +22,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/user")
+    @GetMapping("/{id}")  // Замапил
     public String showUser(Model model, Long id) {
         model.addAttribute("user", userService.getUserById(id));
         return "user/user";

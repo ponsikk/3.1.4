@@ -1,25 +1,24 @@
 package com.example.demo.controller;
 import com.example.demo.model.User;
-import com.example.demo.service.RoleService;
-import com.example.demo.service.impl.UserServiceImp;
+import com.example.demo.service.RoleServiceImp;
+import com.example.demo.service.UserServiceImp;
 
 import com.example.demo.util.UserValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController // rework
 @RequestMapping("/admin")
 public class AdminController {
 
-    private final UserServiceImp userService;
+    private final UserServiceImp userService; // Тут тоже реализация Imp
     private final UserValidator userValidator;
-    private final RoleService roleService;
+    private final RoleServiceImp roleService; // Теперь зависим от реализаций
 
     @Autowired
-    public AdminController(UserServiceImp userService, UserValidator userValidator, RoleService roleService) {
+    public AdminController(UserServiceImp userService, UserValidator userValidator, RoleServiceImp roleService) {
         this.userService = userService;
         this.userValidator = userValidator;
         this.roleService = roleService;
@@ -32,7 +31,7 @@ public class AdminController {
     }
 
     @GetMapping(value = "/addUser")
-    public String add(Model model) {
+    public String addsUser(Model model) {
         model.addAttribute("user", new User());
         model.addAttribute("roles", roleService.getRoles());
         model.addAttribute("users",userService.getAllUsers());
@@ -41,7 +40,7 @@ public class AdminController {
 
 
     @PostMapping("/addUser")
-    public String add(Model model, @RequestBody User user,@RequestParam BindingResult bindingResult){
+    public String addsUser(Model model, @RequestBody User user, @RequestParam BindingResult bindingResult){
         userValidator.validate(user, bindingResult);
         if (bindingResult.hasErrors()){
             return "admin/addUser";
@@ -52,7 +51,7 @@ public class AdminController {
     }
 
     @GetMapping("/editUser/{id}")
-    public String edit( Model model, @RequestParam Long id) {
+    public String editUser(Model model, @RequestParam Long id) {
         model.addAttribute("user", userService.getUserById(id));
         model.addAttribute("roles", roleService.getRoles());
         model.addAttribute("users",userService.getAllUsers());
@@ -60,14 +59,14 @@ public class AdminController {
     }
 
     @PatchMapping("/{id}")
-    public String update(@RequestBody User user, @RequestParam Long id){
+    public String updateUser(@RequestBody User user, @RequestParam Long id){
         userService.updateUser(id,user);
         return "redirect:/admin";
     }
 
 
     @DeleteMapping("/delete/{id}")
-    private String delete(@RequestParam Long id) {
+    private String deleteUser(@RequestParam Long id) {
         userService.deleteUser(id);
         return "redirect:/admin";
     }
