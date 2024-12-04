@@ -9,13 +9,13 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-@RestController // rework
+@RestController
 @RequestMapping("/admin")
 public class AdminController {
 
-    private final UserServiceImp userService; // Тут тоже реализация Imp
+    private final UserServiceImp userService;
     private final UserValidator userValidator;
-    private final RoleServiceImp roleService; // Теперь зависим от реализаций
+    private final RoleServiceImp roleService;
 
     @Autowired
     public AdminController(UserServiceImp userService, UserValidator userValidator, RoleServiceImp roleService) {
