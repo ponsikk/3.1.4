@@ -3,9 +3,9 @@ package com.example.demo.controller;
 
 
 
-import com.example.demo.service.UserService;
-
+import com.example.demo.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
@@ -15,17 +15,12 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/user")
 public class UserController {
-    private final UserService userService;
-
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @GetMapping("/{id}")  // Замапил
-    public String showUser(Model model, Long id) {
-        model.addAttribute("user", userService.getUserById(id));
-        return "user/user";
+    @GetMapping("")
+    public String showUserInfo(@CurrentSecurityContext(expression = "authentication.principal") User principal,
+                               Model model) {
+        model.addAttribute("user", principal);
+        return "fragments/user-info";
     }
 }
+
 

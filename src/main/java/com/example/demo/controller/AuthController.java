@@ -1,47 +1,57 @@
 package com.example.demo.controller;
 
+
 import com.example.demo.model.User;
+
+import com.example.demo.service.RoleService;
 import com.example.demo.service.UserService;
-import com.example.demo.util.UserValidator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
 
-
-    private final UserValidator userValidator;
     private final UserService userService;
+    private final RoleService roleService;
 
-    public AuthController(UserValidator userValidator, UserService userService) {
-        this.userValidator = userValidator;
+    @Autowired
+    public AuthController(UserService userService, RoleService roleService) {
         this.userService = userService;
-    }
+        this.roleService = roleService;
 
+    }
 
     @GetMapping("/login")
-    public String loginPage() {
-        return "auth/login";
-    }
-
-    @GetMapping("registration")
-    public String registrationPage(@ModelAttribute("user") User user) {
-        return "auth/registration";
-    }
-
-    @PostMapping("/registration")
-    public String performRegistration(@ModelAttribute("user") User user, BindingResult bindingResult) {
-        userValidator.validate(user, bindingResult);
-
-        if (bindingResult.hasErrors()) {
-            return "/auth/registration";
+    public String welcomePage(Model model, HttpSession session,
+                              @SessionAttribute(required = false, name = "Authentication-Name") String authenticationName) {
+        if (authenticationName != null) {
+            User user = userService.getAllUsers()
+                    .stream()
+                    .filter(u -> u.getUsername().equals(authenticationName))
+                    .findFirst()
+                    .orElse(null);
+            if (user != null) {
+                session.setAttribute("user", user);
+                model.addAttribute("authenticated", true);
+                model.addAttribute("user", user);
+            } else {
+                session.invalidate();
+            }
+        } else {
+            session.invalidate();
+            model.addAttribute("authenticated", false);
         }
-        userService.saveUser(user);
-        return "redirect:/auth/login";
+
+        return "index";
+    }
+
+    @GetMapping("/access-denied")
+    public String accessDeniedPage() {
+        return "access-denied-page";
     }
 }

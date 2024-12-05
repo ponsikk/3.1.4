@@ -26,15 +26,24 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = Optional.ofNullable((userRepository.findByUsername(username)));
-        if(username.isEmpty()){
-            throw  new UsernameNotFoundException(String.format("User '%u not found",username));
+        if (username.isEmpty()) {
+            throw new UsernameNotFoundException(String.format("User '%s' not found", username));
         }
-        return  new org.springframework.security.core.userdetails.
-                User(user.get().getUsername(), user.get().getPassword(),
-                mapRolesToAutorities(user.get().getRoles()));
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(String.format("User '%s' not found", username)));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                mapRolesToAuthorities(user.getRoles())
+        );
     }
-    private Collection<? extends GrantedAuthority> mapRolesToAutorities(Collection<Role> roles){
-        return roles.stream().map(r-> new SimpleGrantedAuthority(r.getRoleName())).collect(Collectors.toList());
+
+    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
+                .collect(Collectors.toList());
     }
 }
+
